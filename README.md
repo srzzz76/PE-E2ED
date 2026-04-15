@@ -18,4 +18,4 @@ Official implementation of the paper:
 
 Interferometric phase retrieval is fundamental to high-precision optical metrology. However, reconciling the computational efficiency of deep learning with the rigorous interpretability of physical models remains a challenge.
 
-**PE-E2ED** introduces a physics-embedded, end-to-end differentiable framework that internalizes a classical physical solver as a functional layer. This architecture enables global optimization while preserving gradient propagation, effectively overcoming the non-differentiable bottleneck of traditional phase unwrapping. Consequently, our framework achieves state-of-the-art (SOTA) performance in high-precision nanoscale metrology:
+**PE-E2ED** introduces a physics-embedded, end-to-end differentiable framework that internalizes a classical physical solver as a functional layer. This architecture enables global optimization while preserving gradient propagation, effectively overcoming the non-differentiable bottleneck of traditional phase unwrapping. Consequently, our framework achieves state-of-the-art (SOTA) performance in high-precision nanoscale metrology.
