@@ -9,6 +9,7 @@ Official implementation of the paper:
 
 
 ## 📢 News
+* **[2026.07]** 🎉 Our paper has been officially accepted by **Laser & Photonics Reviews**!
 * **[2026.04]** The paper has been submitted. 
 * **[Important]** The source code is currently private and will be fully released upon official publication. Feel free to **Star** this repository for updates.
 
