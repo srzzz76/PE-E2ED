@@ -56,15 +56,15 @@ def train(args):
     )
     scheduler = None
     best_validation_l1 = float("inf")
-    full_metric_names = [
+    metric_names = [
         "total",
         "l1",
         "sc",
         "nll",
     ]
-    full_metrics_path = output_dir / "full_metrics.csv"
+    metrics_path = output_dir / "metrics.csv"
     if rank == 0:
-        with full_metrics_path.open("w", newline="", encoding="utf-8") as file:
+        with metrics_path.open("w", newline="", encoding="utf-8") as file:
             csv.DictWriter(
                 file,
                 fieldnames=[
@@ -166,7 +166,7 @@ def train(args):
 
         model.eval()
         validation_totals = torch.zeros(
-            len(full_metric_names) + 1, dtype=torch.float64, device=device
+            len(metric_names) + 1, dtype=torch.float64, device=device
         )
         with torch.no_grad():
             for noisy_images, _, phase_target in validation_loader:
@@ -190,7 +190,7 @@ def train(args):
                     config,
                 )
                 count = len(noisy_images)
-                metric_values = [validation_metrics[name] for name in full_metric_names]
+                metric_values = [validation_metrics[name] for name in metric_names]
                 validation_totals[:-1] += torch.tensor(
                     metric_values, dtype=torch.float64, device=device
                 ) * count
@@ -198,7 +198,7 @@ def train(args):
 
         reduce_sum(validation_totals)
         validation_averages = validation_totals[:-1] / validation_totals[-1].clamp_min(1)
-        averaged_metrics = dict(zip(full_metric_names, validation_averages.tolist()))
+        averaged_metrics = dict(zip(metric_names, validation_averages.tolist()))
         validation_loss = averaged_metrics["total"]
         validation_l1 = averaged_metrics["l1"]
         if rank == 0:
@@ -206,7 +206,7 @@ def train(args):
             if validation_l1 < best_validation_l1:
                 best_validation_l1 = validation_l1
                 torch.save(unwrap_model(model).state_dict(), output_dir / "best.pth")
-            full_log = {
+            metric_log = {
                 "epoch": epoch,
                 "time": datetime.now().strftime("%H:%M:%S"),
                 "stage": config["name"],
@@ -216,9 +216,9 @@ def train(args):
                 "val_sc": averaged_metrics["sc"],
                 "val_nll": averaged_metrics["nll"],
             }
-            with full_metrics_path.open("a", newline="", encoding="utf-8") as file:
-                writer = csv.DictWriter(file, fieldnames=full_log.keys())
-                writer.writerow(full_log)
+            with metrics_path.open("a", newline="", encoding="utf-8") as file:
+                writer = csv.DictWriter(file, fieldnames=metric_log.keys())
+                writer.writerow(metric_log)
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(
                 f"[{timestamp}] Epoch {epoch + 1}/{args.epochs} | train={train_loss:.6f} "
