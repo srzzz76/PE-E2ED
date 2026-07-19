@@ -1,0 +1,60 @@
+seed: 3407
+epochs: 70
+batch_size: 4
+learning_rate: 0.003
+workers: 16
+deterministic: false
+save_full_metrics: true
+lr_scale: 0.1
+
+model:
+  backbone:
+    in_channel: 2
+    out_channel: 2
+    width: 16
+    middle_blk_num: 4
+    enc_blk_nums: [1, 1, 1, 4]
+    dec_blk_nums: [2, 1, 1, 1]
+  refine:
+    width: 32
+    num_blocks: 4
+
+stages:
+  0:
+    name: Stage1_Physics_SinCos_Only
+    w_l1: 0.0
+    w_grad: 0.0
+    w_tv: 0.0
+    w_sin_cos: 1.0
+    w_cons: 0.0
+    w_bayesian: 0.1
+    w_unit: 0.5
+  30:
+    name: Stage1.5_Joint_Warmup
+    w_l1: 1.0
+    w_grad: 1.0
+    w_tv: 0.0
+    w_sin_cos: 1.0
+    w_cons: 0.0
+    w_bayesian: 0.2
+    w_unit: 0.5
+  50:
+    name: Stage2_Full_Refine
+    w_l1: 3.0
+    w_grad: 1.0
+    w_tv: 0.1
+    w_sin_cos: 1.0
+    w_cons: 1.0
+    w_bayesian: 0.5
+    w_unit: 1.0
+
+perturbation:
+  early:
+    until_epoch: 50
+    amplitude: [0.3, 0.3]
+    background: [0.5, 0.5]
+    noise_std: 0.02
+  late:
+    amplitude: [0.2, 0.4]
+    background: [0.4, 0.6]
+    noise_std: 0.05
