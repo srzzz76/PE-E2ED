@@ -91,7 +91,7 @@ torchrun --standalone --nproc-per-node=2 train.py \
 
 Common options include `--epochs`, `--batch-size`, `--learning-rate`,
 `--workers`, `--seed`, and `--deterministic`. Training saves `latest.pth`,
-`best.pth`, and `full_metrics.csv` in the output directory.
+`best.pth`, and `metrics.csv` in the output directory.
 
 ## Inference
 
