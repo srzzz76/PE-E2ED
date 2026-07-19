@@ -4,7 +4,6 @@ batch_size: 4
 learning_rate: 0.003
 workers: 16
 deterministic: false
-save_full_metrics: true
 lr_scale: 0.1
 
 model:
