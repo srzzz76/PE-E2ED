@@ -62,9 +62,6 @@ def train(args):
         "l1",
         "sc",
         "nll",
-        "nll_term",
-        "logvar_term",
-        "unit",
     ]
     full_metrics_path = output_dir / "full_metrics.csv"
     if rank == 0:
@@ -81,14 +78,10 @@ def train(args):
                         "time",
                         "stage",
                         "train_total",
-                        "train_raw_consist",
                         "val_total",
                         "val_l1",
                         "val_sc",
                         "val_nll",
-                        "val_nll_term",
-                        "val_logvar_term",
-                        "val_unit",
                     ],
                 ).writeheader()
 
@@ -114,7 +107,7 @@ def train(args):
                 )
 
         model.train()
-        train_totals = torch.zeros(3, dtype=torch.float64, device=device)
+        train_totals = torch.zeros(2, dtype=torch.float64, device=device)
         iterator = tqdm(
             train_loader,
             desc=f"Epoch {epoch + 1} [{config['name']}]",
@@ -143,7 +136,6 @@ def train(args):
                 config,
             )
             consistency_loss = torch.tensor(0.0, device=device)
-            raw_consistency = 0.0
             if config["w_cons"] > 0:
                 with torch.no_grad():
                     batch_size = len(noisy_images)
@@ -166,20 +158,17 @@ def train(args):
                 consistency_loss = config["w_cons"] * F.l1_loss(
                     varied_phase * mask, detached_phase * mask
                 )
-                raw_consistency = consistency_loss.item() / config["w_cons"]
 
             total_loss = base_loss + consistency_loss
             total_loss.backward()
             optimizer.step()
             train_totals[0] += total_loss.detach().double() * len(noisy_images)
-            train_totals[1] += raw_consistency * len(noisy_images)
-            train_totals[2] += len(noisy_images)
+            train_totals[1] += len(noisy_images)
 
         if scheduler is not None:
             scheduler.step()
         reduce_sum(train_totals)
-        train_loss = (train_totals[0] / train_totals[2].clamp_min(1)).item()
-        train_raw_consistency = (train_totals[1] / train_totals[2].clamp_min(1)).item()
+        train_loss = (train_totals[0] / train_totals[1].clamp_min(1)).item()
 
         model.eval()
         validation_totals = torch.zeros(
@@ -233,14 +222,10 @@ def train(args):
                     "time": datetime.now().strftime("%H:%M:%S"),
                     "stage": config["name"],
                     "train_total": train_loss,
-                    "train_raw_consist": train_raw_consistency,
                     "val_total": averaged_metrics["total"],
                     "val_l1": averaged_metrics["l1"],
                     "val_sc": averaged_metrics["sc"],
                     "val_nll": averaged_metrics["nll"],
-                    "val_nll_term": averaged_metrics["nll_term"],
-                    "val_logvar_term": averaged_metrics["logvar_term"],
-                    "val_unit": averaged_metrics["unit"],
                 }
                 with full_metrics_path.open("a", newline="", encoding="utf-8") as file:
                     writer = csv.DictWriter(file, fieldnames=full_log.keys())
