@@ -56,7 +56,6 @@ def train(args):
     )
     scheduler = None
     best_validation_l1 = float("inf")
-    metrics_path = output_dir / "metrics.csv"
     full_metric_names = [
         "total",
         "l1",
@@ -65,25 +64,20 @@ def train(args):
     ]
     full_metrics_path = output_dir / "full_metrics.csv"
     if rank == 0:
-        with metrics_path.open("w", newline="", encoding="utf-8") as file:
-            csv.writer(file).writerow(
-                ["epoch", "stage", "train_loss", "validation_loss", "validation_l1"]
-            )
-        if args.save_full_metrics:
-            with full_metrics_path.open("w", newline="", encoding="utf-8") as file:
-                csv.DictWriter(
-                    file,
-                    fieldnames=[
-                        "epoch",
-                        "time",
-                        "stage",
-                        "train_total",
-                        "val_total",
-                        "val_l1",
-                        "val_sc",
-                        "val_nll",
-                    ],
-                ).writeheader()
+        with full_metrics_path.open("w", newline="", encoding="utf-8") as file:
+            csv.DictWriter(
+                file,
+                fieldnames=[
+                    "epoch",
+                    "time",
+                    "stage",
+                    "train_total",
+                    "val_total",
+                    "val_l1",
+                    "val_sc",
+                    "val_nll",
+                ],
+            ).writeheader()
 
     for epoch in range(args.epochs):
         if train_sampler is not None:
@@ -212,24 +206,19 @@ def train(args):
             if validation_l1 < best_validation_l1:
                 best_validation_l1 = validation_l1
                 torch.save(unwrap_model(model).state_dict(), output_dir / "best.pth")
-            with metrics_path.open("a", newline="", encoding="utf-8") as file:
-                csv.writer(file).writerow(
-                    [epoch + 1, config["name"], train_loss, validation_loss, validation_l1]
-                )
-            if args.save_full_metrics:
-                full_log = {
-                    "epoch": epoch,
-                    "time": datetime.now().strftime("%H:%M:%S"),
-                    "stage": config["name"],
-                    "train_total": train_loss,
-                    "val_total": averaged_metrics["total"],
-                    "val_l1": averaged_metrics["l1"],
-                    "val_sc": averaged_metrics["sc"],
-                    "val_nll": averaged_metrics["nll"],
-                }
-                with full_metrics_path.open("a", newline="", encoding="utf-8") as file:
-                    writer = csv.DictWriter(file, fieldnames=full_log.keys())
-                    writer.writerow(full_log)
+            full_log = {
+                "epoch": epoch,
+                "time": datetime.now().strftime("%H:%M:%S"),
+                "stage": config["name"],
+                "train_total": train_loss,
+                "val_total": averaged_metrics["total"],
+                "val_l1": averaged_metrics["l1"],
+                "val_sc": averaged_metrics["sc"],
+                "val_nll": averaged_metrics["nll"],
+            }
+            with full_metrics_path.open("a", newline="", encoding="utf-8") as file:
+                writer = csv.DictWriter(file, fieldnames=full_log.keys())
+                writer.writerow(full_log)
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(
                 f"[{timestamp}] Epoch {epoch + 1}/{args.epochs} | train={train_loss:.6f} "
@@ -276,13 +265,6 @@ def parse_args():
             "training speed; by default cuDNN benchmark mode is enabled."
         ),
     )
-    parser.add_argument(
-        "--no-save-full-metrics",
-        action="store_false",
-        dest="save_full_metrics",
-        help="Disable the complete per-epoch loss breakdown in full_metrics.csv.",
-    )
-    parser.set_defaults(save_full_metrics=settings["save_full_metrics"])
     args = parser.parse_args()
     args.settings = settings
     return args
