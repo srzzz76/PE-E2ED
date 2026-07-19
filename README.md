@@ -133,13 +133,6 @@ model.eval()
 model.switch_to_deploy()
 ```
 
-## Reproducibility
-
-The default random seed is `3407`. Data augmentations remain different across
-epochs while repeated runs with the same environment and settings use the same
-random sequence. Add `--deterministic` for stricter same-environment
-reproducibility, at a possible performance cost.
-
 ## Citation
 
 The complete citation will be updated after the final publication information
