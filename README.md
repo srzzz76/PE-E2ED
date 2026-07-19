@@ -1,22 +1,166 @@
 # Physics-Embedded End-to-End Differentiable Framework (PE-E2ED)
 
-Official implementation of the paper:  
-**"Physics-Embedded End-to-End Differentiable Framework for High-Precision and Robust Interferometry"**
+Official PyTorch implementation of:
 
-[![Paper](https://img.shields.io/badge/Paper-In__Press-red)](https://github.com/srzzz76/PE-E2ED)
+> **Physics-Embedded End-to-End Differentiable Framework for High-Precision and Robust Interferometry**  
+> Accepted by *Laser & Photonics Reviews*.
+
+[![Paper](https://img.shields.io/badge/Paper-In%20Press-red)](https://github.com/srzzz76/PE-E2ED)
+[![PyTorch](https://img.shields.io/badge/PyTorch-%3E%3D2.0-ee4c2c?logo=pytorch)](https://pytorch.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Code](https://img.shields.io/badge/Code-Coming__Soon-yellow)](https://github.com/srzzz76/PE-E2ED)
 
+## News
 
-## 📢 News
-* **[2026.07]** 🎉 Our paper has been officially accepted by **Laser & Photonics Reviews**!
-* **[2026.04]** The paper has been submitted. 
-* **[Important]** The source code is currently private and will be fully released upon official publication. Feel free to **Star** this repository for updates.
+- **2026-07:** The paper was accepted by *Laser & Photonics Reviews*.
+- **2026-07:** Training and inference code was released.
+- **2026-04:** The paper was submitted.
 
----
+## Overview
 
-## 💡 Overview
+PE-E2ED is a physics-embedded framework for two-frame interferometric phase
+retrieval. It integrates a differentiable weighted least-squares phase
+unwrapping solver into an end-to-end network, allowing global phase consistency
+to participate directly in training. The framework also combines pixel-wise
+uncertainty estimation, large-kernel sensing, cross-frame attention, and
+physics-informed curriculum learning for accurate and robust phase
+reconstruction.
 
-Interferometric phase retrieval is fundamental to high-precision optical metrology. However, reconciling the computational efficiency of deep learning with the rigorous interpretability of physical models remains a challenge.
+## Project structure
 
-**PE-E2ED** introduces a physics-embedded, end-to-end differentiable framework that internalizes a classical physical solver as a functional layer. This architecture enables global optimization while preserving gradient propagation, effectively overcoming the non-differentiable bottleneck of traditional phase unwrapping. Consequently, our framework achieves state-of-the-art (SOTA) performance in high-precision nanoscale metrology.
+```text
+PE-E2ED/
+├── configs/train.yaml             # Training configuration
+├── phase_reconstruction/
+│   ├── data.py                    # Dataset
+│   ├── layers.py                  # Reparameterization blocks
+│   ├── losses.py                  # Loss functions
+│   ├── model.py                   # Model definitions
+│   └── training.py                # Training utilities
+├── train.py
+└── predict.py                     # Single and batch inference
+```
+
+## Installation
+
+Python 3.10 or later is recommended. Install the PyTorch build appropriate for
+your CUDA version, then run:
+
+```bash
+git clone https://github.com/srzzz76/PE-E2ED.git
+cd PE-E2ED
+pip install -r requirements.txt
+```
+
+## Dataset
+
+Prepare matching 8-bit or 16-bit PNG files using the following structure:
+
+```text
+dataset/
+├── frame1/
+│   └── 0001.png
+├── frame2/
+│   └── 0001.png
+└── phi/
+    └── 0001.png
+```
+
+Images and phase labels are normalized to `[0, 1]`. In the current
+implementation, normalized phase `p` corresponds to physical phase `80p - 40`.
+
+## Training
+
+The default model and training settings are defined in
+[`configs/train.yaml`](configs/train.yaml).
+
+Single GPU:
+
+```bash
+python train.py \
+  --data-dir "/path/to/dataset" \
+  --output-dir "outputs/run-1"
+```
+
+Two GPUs:
+
+```bash
+torchrun --standalone --nproc-per-node=2 train.py \
+  --data-dir "/path/to/dataset" \
+  --output-dir "outputs/run-1"
+```
+
+Common options include `--epochs`, `--batch-size`, `--learning-rate`,
+`--workers`, `--seed`, and `--deterministic`. Training saves `latest.pth`,
+`best.pth`, and CSV metric files in the output directory.
+
+## Inference
+
+Single image pair:
+
+```bash
+python predict.py \
+  --frame1 "/path/to/frame1/0001.png" \
+  --frame2 "/path/to/frame2/0001.png" \
+  --checkpoint "outputs/run-1/best.pth" \
+  --output-dir "prediction/0001"
+```
+
+Batch prediction and evaluation use the same script:
+
+```bash
+python predict.py \
+  --data-dir "/path/to/test_dataset" \
+  --checkpoint "outputs/run-1/best.pth" \
+  --output-dir "results/run-1"
+```
+
+Batch inference saves phase images. If labels are available in `phi/`, it also
+saves `loss_curve.png`, containing the L1 loss of every test sample. Labels are
+optional for inference.
+
+## Reparameterization
+
+During training, the large-kernel block contains a main convolution and
+auxiliary dilated branches. The prediction scripts fuse these branches into a
+single `13 x 13` depthwise convolution by default. Use
+`--no-reparameterize` to disable fusion.
+
+For direct model use:
+
+```python
+model.load_state_dict(torch.load("best.pth", map_location="cpu"))
+model.eval()
+model.switch_to_deploy()
+```
+
+## Reproducibility
+
+The default random seed is `3407`. Data augmentations remain different across
+epochs while repeated runs with the same environment and settings use the same
+random sequence. Add `--deterministic` for stricter same-environment
+reproducibility, at a possible performance cost.
+
+## Citation
+
+The complete citation will be updated after the final publication information
+becomes available.
+
+```bibtex
+@article{pe_e2ed2026,
+  title   = {Physics-Embedded End-to-End Differentiable Framework for
+             High-Precision and Robust Interferometry},
+  journal = {Laser \& Photonics Reviews},
+  year    = {2026},
+  note    = {In press}
+}
+```
+
+## Acknowledgements
+
+Parts of the restoration backbone are derived from
+[NAFNet](https://github.com/megvii-research/NAFNet) and BasicSR-style image
+restoration code.
+
+## License
+
+This project is released under the [MIT License](LICENSE).
