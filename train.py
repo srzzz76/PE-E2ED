@@ -60,8 +60,8 @@ def train(args):
     full_metric_names = [
         "total",
         "l1",
-        "sin",
-        "bayesian",
+        "sc",
+        "nll",
         "nll_term",
         "logvar_term",
         "unit",
@@ -84,8 +84,8 @@ def train(args):
                         "train_raw_consist",
                         "val_total",
                         "val_l1",
-                        "val_sin",
-                        "val_bayesian",
+                        "val_sc",
+                        "val_nll",
                         "val_nll_term",
                         "val_logvar_term",
                         "val_unit",
@@ -106,7 +106,7 @@ def train(args):
                     output_dir / f"{config['name']}_init.pth",
                 )
             best_validation_l1 = float("inf")
-            if config["name"] == "Stage1.5_Joint_Warmup":
+            if config["name"] == "Stage2_Joint_Phase_Retrieval":
                 for parameter_group in optimizer.param_groups:
                     parameter_group["lr"] = 2e-3 * settings["lr_scale"]
                 scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
@@ -236,8 +236,8 @@ def train(args):
                     "train_raw_consist": train_raw_consistency,
                     "val_total": averaged_metrics["total"],
                     "val_l1": averaged_metrics["l1"],
-                    "val_sin": averaged_metrics["sin"],
-                    "val_bayesian": averaged_metrics["bayesian"],
+                    "val_sc": averaged_metrics["sc"],
+                    "val_nll": averaged_metrics["nll"],
                     "val_nll_term": averaged_metrics["nll_term"],
                     "val_logvar_term": averaged_metrics["logvar_term"],
                     "val_unit": averaged_metrics["unit"],

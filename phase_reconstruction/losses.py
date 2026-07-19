@@ -31,11 +31,11 @@ class PhaseLoss(nn.Module):
         else:
             phase_l1 = gradient_loss = tv_loss = torch.tensor(0.0, device=variance.device)
 
-        total = config["w_l1"] * phase_l1 + config["w_grad"] * gradient_loss + config["w_tv"] * tv_loss + config["w_sin_cos"] * (sin_loss + cos_loss) + config["w_bayesian"] * bayesian_loss + config["w_unit"] * unit_loss
+        total = config["w_l1"] * phase_l1 + config["w_grad"] * gradient_loss + config["w_tv"] * tv_loss + config["w_sc"] * (sin_loss + cos_loss) + config["w_nll"] * bayesian_loss + config["w_unit"] * unit_loss
         active_pixels = mask.sum() + 1e-6
         metrics = {
-            "total": total.item(), "l1": phase_l1.item(), "sin": sin_loss.item(),
-            "bayesian": bayesian_loss.item(),
+            "total": total.item(), "l1": phase_l1.item(),
+            "sc": (sin_loss + cos_loss).item(), "nll": bayesian_loss.item(),
             "nll_term": ((residual / (2 * variance)) * mask).sum().item() / active_pixels.item(),
             "logvar_term": ((0.5 * torch.log(variance)) * mask).sum().item() / active_pixels.item(),
             "unit": unit_loss.item(),

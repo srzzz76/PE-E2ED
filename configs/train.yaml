@@ -21,31 +21,31 @@ model:
 
 stages:
   0:
-    name: Stage1_Physics_SinCos_Only
+    name: Stage1_Quadrature_Consistent_Warmup
     w_l1: 0.0
     w_grad: 0.0
     w_tv: 0.0
-    w_sin_cos: 1.0
+    w_sc: 1.0
     w_cons: 0.0
-    w_bayesian: 0.1
+    w_nll: 0.1
     w_unit: 0.5
   30:
-    name: Stage1.5_Joint_Warmup
+    name: Stage2_Joint_Phase_Retrieval
     w_l1: 1.0
     w_grad: 1.0
     w_tv: 0.0
-    w_sin_cos: 1.0
+    w_sc: 1.0
     w_cons: 0.0
-    w_bayesian: 0.2
+    w_nll: 0.2
     w_unit: 0.5
   50:
-    name: Stage2_Full_Refine
+    name: Stage3_Full_Physical_Refinement
     w_l1: 3.0
     w_grad: 1.0
     w_tv: 0.1
-    w_sin_cos: 1.0
+    w_sc: 1.0
     w_cons: 1.0
-    w_bayesian: 0.5
+    w_nll: 0.5
     w_unit: 1.0
 
 perturbation:
