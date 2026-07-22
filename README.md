@@ -3,15 +3,15 @@
 Official PyTorch implementation of:
 
 > **Physics-Embedded End-to-End Differentiable Framework for High-Precision and Robust Interferometry**  
-> Accepted by *Laser & Photonics Reviews*.
+> Published in *Laser & Photonics Reviews*.
 
-[![Paper](https://img.shields.io/badge/Paper-In%20Press-red)](https://github.com/srzzz76/PE-E2ED)
+[![Paper](https://img.shields.io/badge/Paper-Published-red)](https://doi.org/10.1002/lpor.71606)
 [![PyTorch](https://img.shields.io/badge/PyTorch-%3E%3D2.0-ee4c2c?logo=pytorch)](https://pytorch.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## News
 
-- **2026-07:** The paper was accepted by *Laser & Photonics Reviews*.
+- **2026-07:** The paper was published in *Laser & Photonics Reviews* ([DOI: 10.1002/lpor.71606](https://doi.org/10.1002/lpor.71606)).
 - **2026-07:** Training and inference code was released.
 - **2026-04:** The paper was submitted.
 
@@ -25,6 +25,14 @@ uncertainty estimation, large-kernel sensing, cross-frame attention, and
 physics-informed curriculum learning for accurate and robust phase
 reconstruction.
 
+<p align="center">
+  <img src="pipeline.png" alt="PE-E2ED pipeline" width="100%">
+</p>
+
+<p align="center">
+  <b>Overview of the proposed PE-E2ED framework.</b>
+</p>
+
 ## Project structure
 
 ```text
@@ -36,6 +44,7 @@ PE-E2ED/
 │   ├── losses.py                  # Loss functions
 │   ├── model.py                   # Model definitions
 │   └── training.py                # Training utilities
+├── pipeline.png                   # Overview of the PE-E2ED framework
 ├── train.py
 └── predict.py                     # Single and batch inference
 ```
@@ -135,16 +144,20 @@ model.switch_to_deploy()
 
 ## Citation
 
-The complete citation will be updated after the final publication information
-becomes available.
+If this work is useful in your research, please cite:
 
 ```bibtex
-@article{pe_e2ed2026,
-  title   = {Physics-Embedded End-to-End Differentiable Framework for
-             High-Precision and Robust Interferometry},
+@article{Shi2026,
+  title = {Physics-{{Embedded End}}-{{To}}-{{End Differentiable Framework}} for {{High}}-{{Precision}} and {{Robust Interferometry}}},
+  author = {Shi, Runzhou and Yin, Peiyu and Wu, Baokun and Zhang, Tian and Bai, Jian},
+  year = {2026},
+  month = jul,
   journal = {Laser \& Photonics Reviews},
-  year    = {2026},
-  note    = {In press}
+  pages = {e71606},
+  issn = {1863-8880, 1863-8899},
+  doi = {10.1002/lpor.71606},
+  urldate = {2026-07-22},
+  langid = {english}
 }
 ```
 
