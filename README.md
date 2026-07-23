@@ -82,15 +82,11 @@ implementation, normalized phase `p` corresponds to physical phase `80p - 40`.
 The default model and training settings are defined in
 [`configs/train.yaml`](configs/train.yaml).
 
-Single GPU:
+By default, PE-E2ED is trained using **two GPUs with Distributed Data Parallel
+(DDP)**. The default per-GPU batch size is 4, resulting in a total batch size of
+8.
 
-```bash
-python train.py \
-  --data-dir "/path/to/dataset" \
-  --output-dir "outputs/run-1"
-```
-
-Two GPUs:
+Two GPUs (default):
 
 ```bash
 torchrun --standalone --nproc-per-node=2 train.py \
